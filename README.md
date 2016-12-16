@@ -168,6 +168,28 @@ void basicTest(String filename) {
 ```
 
 4.void CollisionTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of collision counts in the following format:
+```java
+//Using the three given painting images and a variety of bits-per-pixel values, compute and print out 
+//a table of collision counts in the following format:
+void CollisionTests() {		
+	final Object[][] table = new String[9][];
+	table[0] = new String[] { "Bits Per Pixel", "C(Mona,linear)", "C(Mona,quadratic)", 
+		"C(Starry,linear)", "C(Starry,quadratic)", "C(Christina,linear)", "C(Christina,quadratic)"};
+	for(int i = 24; i > 0; i -= 3){
+		table[9-i/3] = new String[] { ""+i, 
+				""+countColorWithType("MonaLisa.jpg", i, false).collisionCount,
+				""+countColorWithType("MonaLisa.jpg", i, true).collisionCount,
+				""+countColorWithType("StarryNight.jpg", i, false).collisionCount,
+				""+countColorWithType("StarryNight.jpg", i, true).collisionCount,
+				""+countColorWithType("ChristinasWorld.jpg", i, false).collisionCount,
+				""+countColorWithType("ChristinasWorld.jpg", i, true).collisionCount};
+	}
+
+	for (final Object[] row : table) {
+	    System.out.format("%-15s%-15s%-15s%-15s%-15s%-15s%-15s\n", row);
+	}
+}
+```
 
 Bits Per Pixel   C(Mona,linear)  C(Mona,quadratic)  C(Starry,linear) C(Starry,quadratic) C(Christina,linear) C(Christina,quadratic)
 24
@@ -182,6 +204,26 @@ Bits Per Pixel   C(Mona,linear)  C(Mona,quadratic)  C(Starry,linear) C(Starry,qu
 In order to determine the number of collisions, your method countColors should keep a running total of the number of collisions as the pixel colors are counted. The number of collisions for each get and put operation are to be communicated from the ColorHash class back to the caller via the ResponseItem objects. For purposes of this assignment, we will define a collision to occur when either a put operation or a get operation arrives via the hash function or via collision resolution at a location that is occupied and that has the wrong key. (A put operation arriving at a location with the same key is an update operation and this is not a collision.) You may implement the logic for totaling up the numbers of collisions in either FeatureVector.java, ComparePaintings.java, or both. (late addition to the spec: For the collisionTests method, use an initial tableSize of 3 and a rehashLoadFactor value of 0.5.)
 
 5.void fullSimilarityTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of similarity values in the following format:
+```java
+void fullSimilarityTests(){
+	System.out.println();
+	quadratic = true;
+	final Object[][] table = new String[9][];
+	table[0] = new String[] { "Bits Per Pixel", "S(Mona,Starry)", "S(Mona,Christina)", "S(Starry,Christina)"};
+	for(int i = 24; i > 0; i -= 3){
+		table[9-i/3] = new String[] { ""+i, 
+				""+fv(i, "MonaLisa.jpg", "StarryNight.jpg"),
+				""+fv(i, "MonaLisa.jpg", "ChristinasWorld.jpg"),
+				""+fv(i, "ChristinasWorld.jpg", "StarryNight.jpg")};
+		System.out.println("check");
+	}
+
+	for (final Object[] row : table) {
+	    System.out.format("%-15s%-15s%-15s%-15s\n", row);
+	}
+}
+```
+
 Bits Per Pixel       S(Mona,Starry)    S(Mona,Christina)     S(Starry,Christina)
 24
 21
