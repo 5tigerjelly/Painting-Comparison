@@ -66,9 +66,49 @@ You may implement any additional methods you like to serve as helper methods or 
 
 ##What to Implement in Your FeatureVector Class
 
-1. void getTheCounts(ColorHash ch): It will go through all possible key values in order, get the count from the hash table and put it into this feature vector.
-2. double cosineSimilarity(FeatureVector other): This will return a double in the range 0.0 to 1.0 containing the result of doing the cosine similarity computation with the current FeatureVector ("this") and the additional one ("other"). You may call these A and B in the code if you wish.
+1.void getTheCounts(ColorHash ch): It will go through all possible key values in order, get the count from the hash table and put it into this feature vector.
+```java
+public void getTheCounts(ColorHash ch) {
+	if(ch.getTableSize() != keySpaceSize){
+		System.out.println("keySpaceSize is "+keySpaceSize +" tableSize is " + ch.getTableSize());
+	}
+	for(int i = 0; i < keySpaceSize; i++){
+		System.out.println(i);
+		try {
+			ColorKey key = new ColorKey(i, bitsPerPixel); 
+			colorCounts[i] =  ch.getCount(key);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
+}
+```
+2.double cosineSimilarity(FeatureVector other): This will return a double in the range 0.0 to 1.0 containing the result of doing the cosine similarity computation with the current FeatureVector ("this") and the additional one ("other"). You may call these A and B in the code if you wish.
+```java
+public double cosineSimilarity(FeatureVector other) {	
+	double result = dotProduct(other.colorCounts)/
+		(findMagnitude(colorCounts) * findMagnitude(other.colorCounts));
+	return result;
+}
+
+private double dotProduct(long[] a){
+	double result = 0.0;
+	for(int i = 0; i < a.length; i++){
+		result += (double)a[i] * (double)colorCounts[i];
+	}
+	return result;
+}
+
+private double findMagnitude(long[] a) {
+	double result = 0.0;
+	for(int i = 0; i < a.length; i++){
+		result += (double)a[i] * (double)a[i];
+	}
+	result = Math.sqrt(result);
+	return result;
+}
+```
 
 
 ##What to Implement in Your ComparePaintings Class
@@ -79,10 +119,55 @@ There is a separate file FeatureVector.java with a class FeatureVector which has
 
 The ComparePaintings.java file implements a class whose instances handle analysis of one or more paintings. A basic constructor method is already provided. You should implement, for class ComparePaintings the following methods:
 
-1. ColorHash countColors(String filename, int bitsPerPixel): Load the image, construct the hash table, count the colors.
-2. double compare(ColorKeyHash painting1, ColorKeyHash painting2) Starting with two hash tables of color counts, compute a measure of similarity based on the cosine distance of two vectors.
-3. void basicTest(String filename): A basic test for the compare method: S(x,x) should be 1.0, so you should compute the similarity of an image with itself and print out the answer. If it comes out to be 1.0, that is a good sign for your implementation so far. For this method, you may use any initial tableSize you like, any value of rehashLoadFactor that works (you are welcome to experiment here), and either linear probing or quadratic probing.
-4. void CollisionTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of collision counts in the following format:
+1.ColorHash countColors(String filename, int bitsPerPixel): Load the image, construct the hash table, count the colors.
+```java
+// Load the image, construct the hash table, count the colors.
+ColorHash countColors(String filename, int bitsPerPixel) {
+	ImageLoader image = new ImageLoader(filename);
+	ColorHash colorHash;
+	if(quadratic){
+		colorHash = new ColorHash(3, bitsPerPixel, "Quadratic Probing", 0.5);
+	}else{
+		colorHash = new ColorHash(3, bitsPerPixel, "Linear Probing", 0.5);
+	}
+	for(int x = 0; x < image.getWidth(); x++){
+		for(int y = 0; y < image.getHeight(); y++){
+			colorHash.collisionCount += colorHash.increment(image.getColorKey(x, y, bitsPerPixel)).nCollisions;
+		}
+	}
+	return colorHash;
+}
+```
+2.double compare(ColorKeyHash painting1, ColorKeyHash painting2) Starting with two hash tables of color counts, compute a measure of similarity based on the cosine distance of two vectors.
+```java
+//Starting with two hash tables of color counts, compute a measure of similarity 
+//based on the cosine distance of two vectors.
+double compare(ColorHash painting1, ColorHash painting2) {
+	FeatureVector vector = new FeatureVector(painting1.bitsPerPixel);
+	FeatureVector vector2 = new FeatureVector(painting2.bitsPerPixel);
+	vector.getTheCounts(painting1);
+	vector2.getTheCounts(painting2);
+
+	return vector.cosineSimilarity(vector2); 
+}
+```
+
+3.void basicTest(String filename): A basic test for the compare method: S(x,x) should be 1.0, so you should compute the similarity of an image with itself and print out the answer. If it comes out to be 1.0, that is a good sign for your implementation so far. For this method, you may use any initial tableSize you like, any value of rehashLoadFactor that works (you are welcome to experiment here), and either linear probing or quadratic probing.
+```java
+//A basic test for the compare method: S(x,x) should be 1.0, so you should compute the 
+//similarity of an image with itself and print out the answer. If it comes out to be 
+//1.0, that is a good sign for your implementation so far.
+void basicTest(String filename) {
+
+	ImageLoader image = new ImageLoader(filename);
+	ColorHash colorHash = new ColorHash(3, 24, "Linear Probing", 0.5);
+
+	double check = compare(colorHash, colorHash);
+	System.out.println("check value was " + check); 
+}
+```
+
+4.void CollisionTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of collision counts in the following format:
 
 Bits Per Pixel   C(Mona,linear)  C(Mona,quadratic)  C(Starry,linear) C(Starry,quadratic) C(Christina,linear) C(Christina,quadratic)
 24
@@ -96,7 +181,7 @@ Bits Per Pixel   C(Mona,linear)  C(Mona,quadratic)  C(Starry,linear) C(Starry,qu
     
 In order to determine the number of collisions, your method countColors should keep a running total of the number of collisions as the pixel colors are counted. The number of collisions for each get and put operation are to be communicated from the ColorHash class back to the caller via the ResponseItem objects. For purposes of this assignment, we will define a collision to occur when either a put operation or a get operation arrives via the hash function or via collision resolution at a location that is occupied and that has the wrong key. (A put operation arriving at a location with the same key is an update operation and this is not a collision.) You may implement the logic for totaling up the numbers of collisions in either FeatureVector.java, ComparePaintings.java, or both. (late addition to the spec: For the collisionTests method, use an initial tableSize of 3 and a rehashLoadFactor value of 0.5.)
 
-5. void fullSimilarityTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of similarity values in the following format:
+5.void fullSimilarityTests(): Using the three given painting images and a variety of bits-per-pixel values, compute and print out a table of similarity values in the following format:
 Bits Per Pixel       S(Mona,Starry)    S(Mona,Christina)     S(Starry,Christina)
 24
 21
