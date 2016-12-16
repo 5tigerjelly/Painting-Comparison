@@ -31,14 +31,21 @@ By doing this assignment, you will learn how to implement a hash table, includin
 
 We are giving you certain files. Add code to those which are not complete. Then test your program as specified. Here are the names of the files and what they are for.
 
-MonaLisa.jpg: One of the input files, the Mona Lisa painting by Leonardo Da Vinci.
-StarryNight.jpg: another input file, Starry Night by Vincent Van Gogh.
-ChristinasWorld.jpg: The painting "Christina's World" by Andrew Wyeth.
-ColorKey.java: The definition of a class that represents colors at a variety of possible numbers of bits per pixel. The number of bits per pixel controls the size of the key space that we use in hashing. For example, if the number of bits per pixel is 6, then the size of the key space is 26 = 64. This is a relatively small key space, and for a given hash table size, the likelihood of collisions tends to be lower if the key space is smaller.
-ImageLoader.java: This file is complete. You don't have to add anything here. It loads in requested images and supports accessing the pixels and returning them in a variety of different numbers of bits per pixel, as instances of the ColorKey class.
-ColorHash.java: a skeleton for your hash table. Most of your work will be adding code to this file.
-ResponseItem.java: This class is done for you. An instance of this class will be returned whenever get or put operations are performed in a ColorHash hash table. A ResponseItem instance has four fields. int value: meaningful only for get operations (colorHashGet), where the value associated with the key is returned. int nCollisions: the number of collisons involved in this operation. boolean didRehash: true if this operation caused a rehash due to either exceeding the load factor threshold or running out of space (this can happen with quadratic collision resolution). This can only happen when inserting. boolean didUpdate: true if this operation caused the value associated with an existing key to be overwritten (possibly changed but possibly just rewritten with the same value). If the put operation inserted a new key, then false should be returned.
-FeatureVector.java: a skeleton for a class of objects that represent vectors of long integers (the counts of the different colors in an image). You will implement methods for retrieving the count values from hash tables and comparing a pair of vectors.
+1.MonaLisa.jpg: One of the input files, the Mona Lisa painting by Leonardo Da Vinci.
+
+2.StarryNight.jpg: another input file, Starry Night by Vincent Van Gogh.
+
+3.ChristinasWorld.jpg: The painting "Christina's World" by Andrew Wyeth.
+
+4.ColorKey.java: The definition of a class that represents colors at a variety of possible numbers of bits per pixel. The number of bits per pixel controls the size of the key space that we use in hashing. For example, if the number of bits per pixel is 6, then the size of the key space is 26 = 64. This is a relatively small key space, and for a given hash table size, the likelihood of collisions tends to be lower if the key space is smaller.
+
+5.ImageLoader.java: This file is complete. You don't have to add anything here. It loads in requested images and supports accessing the pixels and returning them in a variety of different numbers of bits per pixel, as instances of the ColorKey class.
+
+5.ColorHash.java: a skeleton for your hash table. Most of your work will be adding code to this file.
+
+6.ResponseItem.java: This class is done for you. An instance of this class will be returned whenever get or put operations are performed in a ColorHash hash table. A ResponseItem instance has four fields. int value: meaningful only for get operations (colorHashGet), where the value associated with the key is returned. int nCollisions: the number of collisons involved in this operation. boolean didRehash: true if this operation caused a rehash due to either exceeding the load factor threshold or running out of space (this can happen with quadratic collision resolution). This can only happen when inserting. boolean didUpdate: true if this operation caused the value associated with an existing key to be overwritten (possibly changed but possibly just rewritten with the same value). If the put operation inserted a new key, then false should be returned.
+
+7.FeatureVector.java: a skeleton for a class of objects that represent vectors of long integers (the counts of the different colors in an image). You will implement methods for retrieving the count values from hash tables and comparing a pair of vectors.
 ComparePaintings.java: a skeleton for your application. Some of your work will be adding code to this file.
 
 
