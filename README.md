@@ -246,5 +246,6 @@ A feature vector is a sequence of numbers that describes the features of some ob
 
 Let A and B be two n-dimensional vectors. Then the cosine similary value between them is computed using the following formula. 
 
+![alt text](https://courses.cs.washington.edu/courses/cse373/16au/A/A3/cosineSimilarityFormula.png "Logo Title Text 1")
 
 The numerator here is called the dot product of A and B. The denominator here is a scalar product of two magnitude values: the magnitude of A times the magnitude of B. When you implement this, you may wish to implement separate "helper" methods for magnitude and for dot product. If you do this, you are free to name those and design them however you like.
