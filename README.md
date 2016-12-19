@@ -48,18 +48,141 @@ We are giving you certain files. Add code to those which are not complete. Then 
 
 In the file ColorHash.java, implement the following methods and make them public...
 
-1. ColorHash(int tableSize, int bitsPerPixel, String collisionResolutionMethod, double rehashLoadFactor). This is a constructor. Here is how your hash table should work. The constructor should create a new hash table implemented as one or more arrays. One approach would be to have separate arrays for the keys and the values. An alternative would be to define an inner class to represent a (key, value) pair and have an array of those pairs. That choice is up to you. The naming of these internal members of class ColorHash is up to you. The constructor should support two collision resolution methods: "Linear Probing" and "Quadratic Probing".
-2. ResponseItem colorHashPut(ColorKey key, long value). The method colorHashPut should normally insert the key into the hash table and enter the value associated with it. If there already exists an entry for this key, then the new value should be stored, overwriting the old value. (We will be using the values here to represent counts of the corresponding colors.) The response item should be returned that gives all the relevant status of this operation.
-3. ResponseItem increment(Colorkey key). The method increment should do the following: If the key is already in the table, get the value, add one to it, and replace the old value with the new value. If the key is not in the table, insert it and store the value 1 with it. Implement this method so that the "find" portion of the operation is performed only once. This should cut the number of collisions to half the number that would be required if it were performed with separate get and put operations. The returned ResponseItem should contain the number of collisions involved in the initial find operation.
-4. ResponseItem colorHashGet(ColorKey key) throws MissingColorKeyException. The method colorHashGet should look up the key and return its value. If the key is not there, it should throw an exception with the new type MissingColorKeyException.
-5. long getCount(ColorKey key). The method getCount should return 0 if the key is not in the table. Otherwise, it should return the value associated with the key.
-6. ColorKey getKeyAt(int tableIndex). The method getKeyAt should return whatever key is currently being stored at location tableIndex in your array. This is not a standard hashing method, but is used in debugging and compliance checking.
-7. long getValueAt(int tableIndex). The method getValueAt should return whatever value is currently being stored at location tableIndex in your array. Like getKeyAt, this is not a standard hashing method, but is used in debugging and compliance checking. (Clarification: the question came up of how to handle cases where the table has no entry at the given tableIndex. We suggest returning -1L. However, it will also be acceptable to throw a RuntimeException. The new JUnit test script should allow both of these to pass, within the test of quadratic probing.)
-8. double getLoadFactor(). The method getLoadFactor should return the current value of the load factor of your hash table.
-9. int getTableSize(). The method getTableSize should return the size of your hash table. Since resizing can take place during a put operation, the size might not stay the same during a session.
-10. void resize(). The method resize should allocate a new array (or arrays if you need more than one new one) to build a bigger hash table and then scan the old table from location 0 to location getTableSize()-1, inserting the key-value pairs into the new table using the same approach as with colorHashPut. The new size should be the smallest prime number that is at least double the old table size. You may use the method isPrime in the file IsPrime.java to find out if a number is prime. Before returning from resize, the old array(s) should be replaced by the new one(s), so that they can be garbage-collected.
+1.**ColorHash(int tableSize, int bitsPerPixel, String collisionResolutionMethod, double rehashLoadFactor)**. This is a constructor. Here is how your hash table should work. The constructor should create a new hash table implemented as one or more arrays. One approach would be to have separate arrays for the keys and the values. An alternative would be to define an inner class to represent a (key, value) pair and have an array of those pairs. That choice is up to you. The naming of these internal members of class ColorHash is up to you. The constructor should support two collision resolution methods: "Linear Probing" and "Quadratic Probing".
+```java
+public ColorHash(int tableSize, int bitsPerPixel, String collisionResolutionMethod, double rehashLoadFactor) {
+	this.tableSize = tableSize;
+	this.bitsPerPixel = bitsPerPixel;
+	this.collisionResolutionMethod = collisionResolutionMethod;
+	this.useQuadraticProbing = collisionResolutionMethod.equals("Quadratic Probing");
+	this.rehashLoadFactor = rehashLoadFactor;
+	this.theTable = new HashEntry[tableSize];
+	this.n = 0;
+	this.loadFactor = 0.0;
+	this.debugging = false;
+}
+```
+2.**ResponseItem colorHashPut(ColorKey key, long value)**. The method colorHashPut should normally insert the key into the hash table and enter the value associated with it. If there already exists an entry for this key, then the new value should be stored, overwriting the old value. (We will be using the values here to represent counts of the corresponding colors.) The response item should be returned that gives all the relevant status of this operation.
+```java
+public ResponseItem colorHashPut(ColorKey key, long value) {
+int putCollisionCount = 0;
+boolean resized = false;
+if (((double)this.n + 1.0) / (double)this.tableSize > this.rehashLoadFactor) {
+    int location = this.findLocation(this, key);
+    putCollisionCount += this.collisionCount;
+    if (this.foundEntry == null) {
+	if (this.debugging) {
+	    System.out.println("Before resize, number of collisions from findLocation: " + this.collisionCount);
+	}
+	this.resize();
+	resized = true;
+	if (this.debugging) {
+	    System.out.println("During resize, number of collisions: " + this.resizeCollisionCount);
+	}
+	if (this.debugging) {
+	    System.out.println("Resized table prior to insertion:");
+	    System.out.println(this.showWholeTable());
+	}
+	putCollisionCount += this.resizeCollisionCount;
+    } else {
+	this.foundEntry.value = this.incrementing ? ++this.foundEntry.value : value;
+	return new ResponseItem(-1, this.collisionCount, false, true);
+    }
+}
+ResponseItem ri = this.helpPut(this, key, value);
+ri.didRehash = resized;
+if (this.debugging) {
+    System.out.println("Number of collisions from helpPut: " + ri.nCollisions);
+}
+ri.nCollisions += putCollisionCount;
+return ri;
+}
+```
+3.**ResponseItem increment(Colorkey key)**. The method increment should do the following: If the key is already in the table, get the value, add one to it, and replace the old value with the new value. If the key is not in the table, insert it and store the value 1 with it. Implement this method so that the "find" portion of the operation is performed only once. This should cut the number of collisions to half the number that would be required if it were performed with separate get and put operations. The returned ResponseItem should contain the number of collisions involved in the initial find operation.
+```java
+public ResponseItem increment(ColorKey key) {
+	this.incrementing = true;
+	ResponseItem ri = this.colorHashPut(key, 1);
+	this.incrementing = false;
+	return ri;
+}
+```
+4.**ResponseItem colorHashGet(ColorKey key)** throws MissingColorKeyException. The method colorHashGet should look up the key and return its value. If the key is not there, it should throw an exception with the new type MissingColorKeyException.
+```java
+public ResponseItem colorHashGet(ColorKey key) throws Exception {
+	return this.helpGet(this, key);
+}
+```
+5.**long getCount(ColorKey key)**. The method getCount should return 0 if the key is not in the table. Otherwise, it should return the value associated with the key.
+```java
+public long getCount(ColorKey key) {
+	try {
+		ResponseItem ri = this.helpGet(this, key);
+		return ri.value;
+	}
+	catch (Exception e) {
+		return 0;
+	}
+}
+```
+6.**ColorKey getKeyAt(int tableIndex)**. The method getKeyAt should return whatever key is currently being stored at location tableIndex in your array. This is not a standard hashing method, but is used in debugging and compliance checking.
+```java
+public ColorKey getKeyAt(int tableIndex) {
+	HashEntry e = this.theTable[tableIndex];
+	if (e == null) {
+		return null;
+	}
+	return e.key;
+}
+```
+7.**long getValueAt(int tableIndex)**. The method getValueAt should return whatever value is currently being stored at location tableIndex in your array. Like getKeyAt, this is not a standard hashing method, but is used in debugging and compliance checking. (Clarification: the question came up of how to handle cases where the table has no entry at the given tableIndex. We suggest returning -1L. However, it will also be acceptable to throw a RuntimeException. The new JUnit test script should allow both of these to pass, within the test of quadratic probing.)
+```java
+public long getValueAt(int tableIndex) {
+	HashEntry e = this.theTable[tableIndex];
+	if (e == null) {
+		return -1;
+	}
+	return e.value;
+}
+```
+8.**double getLoadFactor()**. The method getLoadFactor should return the current value of the load factor of your hash table.
+```java
+public double getLoadFactor() {
+	return this.loadFactor;
+}
+```
+9.**int getTableSize()**. The method getTableSize should return the size of your hash table. Since resizing can take place during a put operation, the size might not stay the same during a session.
+```java
+public int getTableSize() {
+	return this.tableSize;
+}
+```
+10.**void resize()**. The method resize should allocate a new array (or arrays if you need more than one new one) to build a bigger hash table and then scan the old table from location 0 to location getTableSize()-1, inserting the key-value pairs into the new table using the same approach as with colorHashPut. The new size should be the smallest prime number that is at least double the old table size. You may use the method isPrime in the file IsPrime.java to find out if a number is prime. Before returning from resize, the old array(s) should be replaced by the new one(s), so that they can be garbage-collected.
 Note that you are not responsible for implementing any code for the deletion of dictionary items in this assignment.
 You may implement any additional methods you like to serve as helper methods or debugging aids. Provide comments for each of these additional methods.
+```java
+public void resize() {
+	int newTableSize = 2 * this.tableSize;
+	while (!IsPrime.isPrime((long)newTableSize)) {
+		++newTableSize;
+	}
+	ColorHash newHash = new ColorHash(newTableSize, this.bitsPerPixel, 
+		this.collisionResolutionMethod, this.rehashLoadFactor);
+	this.resizeCollisionCount = 0;
+	int i = 0;
+	while (i < this.tableSize) {
+		HashEntry e = this.theTable[i];
+		if (e != null) {
+			ResponseItem ri = this.helpPut(newHash, e.key, e.value);
+			this.resizeCollisionCount += ri.nCollisions;
+		}
+		++i;
+	}
+	this.theTable = newHash.theTable;
+	this.tableSize = newHash.tableSize;
+	this.loadFactor = (double)this.n / (double)this.tableSize;
+}
+```
 
 
 
