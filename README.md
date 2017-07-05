@@ -1,5 +1,5 @@
-#Painting-Comparison
-##Overview
+# Painting-Comparison
+## Overview
 
 In this pair of assignments you'll implement a kind of hash table and use it in an application: to compare images with each other for similarity of color usage. You'll do some experimenting with two different hashing collision-resolution policies: linear probing and quadratic probing. So the high-level idea here is "Comparing Composite Objects."
 
@@ -16,7 +16,7 @@ MonaLisa.jpg	StarryNight.jpg	ChristinasWorld.jpg
     
     
     
-##Purposes
+## Purposes
 
 Just as in Assignment 1, you will be using arrays to represent a more advanced abstract data type. Instead of stacks, however, you will be implementing hash tables.
 
@@ -27,7 +27,7 @@ By doing this assignment, you will learn how to implement a hash table, includin
 
 
 
-##What Files are Involved?
+## What Files are Involved?
 
 We are giving you certain files. Add code to those which are not complete. Then test your program as specified. Here are the names of the files and what they are for.
 
@@ -44,7 +44,7 @@ We are giving you certain files. Add code to those which are not complete. Then 
 
 
 
-##What to Implement in your Hash Table Class
+## What to Implement in your Hash Table Class
 
 In the file ColorHash.java, implement the following methods and make them public...
 
@@ -187,7 +187,7 @@ public void resize() {
 
 
 
-##What to Implement in Your FeatureVector Class
+## What to Implement in Your FeatureVector Class
 
 1.void getTheCounts(ColorHash ch): It will go through all possible key values in order, get the count from the hash table and put it into this feature vector.
 ```java
@@ -234,7 +234,7 @@ private double findMagnitude(long[] a) {
 ```
 
 
-##What to Implement in Your ComparePaintings Class
+## What to Implement in Your ComparePaintings Class
 
 The file ComparePaintings.java will be your main application file. It already has some code in it.
 
@@ -361,7 +361,7 @@ As bits per pixel go down, the S values for S(x,y) can be expected to rise towar
 
 
 
-##How to Compute a Cosine Similarity Value
+## How to Compute a Cosine Similarity Value
 
 There are several different interpretations of "vector". For example, a vector is a sequence of numbers. An n-dimensional vector has n numbers. A vector can also be thought of as an object that has direction and magnitude. In physics, a vector may be used to represent velocity of motion; the direction represents which way the object in motion is going, and the magnitude tells how fast it is going.
 
